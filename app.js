@@ -9,6 +9,7 @@ const path = require("path");
 const http = require("http");
 const flash = require("express-flash");
 const bcrypt = require("bcrypt");
+const cookieparser = require("cookie-parser");
 const User = require("./models/user.model.js");
 const Room = require("./models/room.model.js");
 
@@ -16,22 +17,20 @@ const publicDirectoryPath = path.join(__dirname, "/public");
 
 const app = express();
 
+// ================ MIDDLEWARE ====================
 app.use(express.static(publicDirectoryPath));
-app.set("view engine", "ejs");
-app.set("views", "./views");
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
+app.use(cookieparser());
 app.use(express.json());
 
 app.use(flash());
 
-const server = http.Server(app);
-const io = require("socket.io")(server);
-
-app.set("socketio", io);
+app.set("view engine", "ejs");
+app.set("views", "./views");
 
 // =========== MONGOOSE CONNECTION ============
 mongoose.connect(process.env.URL_DATABASE, {
@@ -54,6 +53,139 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ============ SOCKET.IO =================
+const server = http.Server(app);
+const io = require("socket.io")(server);
+
+app.set("socketio", io);
+
+io.on("connection", function (socket) {
+  
+
+  console.log(socket.id + " connected...");
+
+  socket.on("disconnect", function () {
+    console.log(socket.id + " disconnected...");
+  });
+
+  socket.on("Client-create-room", async function (data) {
+    let exRoom = await Room.findOne({ name: data.roomname });
+      console.log(exRoom);
+
+      if (exRoom) {
+        // socket.emit("Notification", "Room has already existed");
+
+        let listRoom = await User.find({
+          _id: mongoose.Types.ObjectId(data.userid),
+        })
+          .populate("rooms")
+          .exec();
+
+        const foundRoom = listRoom[0].rooms.find(
+          (element) => element.name === data
+        );
+        // console.log(foundRoom);
+        if (!foundRoom) {
+          listRoom[0].rooms.push({
+            _id: exRoom._id,
+            name: data.roomname,
+          });
+          listRoom[0].save();
+          socket.emit("Server-send-list-room", listRoom[0].rooms);
+        } else {
+          socket.emit("Notification", "Room has already existed");
+        }
+
+        socket.join(data);
+      } else {
+        const room = new Room({
+          name: data.roomname,
+        });
+
+        // console.log(room);
+
+        room.save().then(async function () {
+          let user = await User.findOne({
+            _id: mongoose.Types.ObjectId(data.userid),
+            rooms: mongoose.Types.ObjectId(room._id),
+          });
+          if (!user) {
+            User.updateOne(
+              { _id: mongoose.Types.ObjectId(data.userid) },
+              { $push: { rooms: room._id } },
+              (err, doc) => {
+                if (err) console.log(err);
+              }
+            );
+          } else {
+            // console.log(user);
+          }
+        });
+
+        let listRoom = await User.find({
+          _id: mongoose.Types.ObjectId(data.userid),
+        })
+          .populate("rooms")
+          .exec();
+        listRoom[0].rooms.push({
+          _id: room._id,
+          name: data.roomname,
+        });
+
+        // listRoom[0].save();
+
+        socket.emit("Server-send-list-room", listRoom[0].rooms);
+
+        socket.join(data);
+      }
+  })
+
+  socket.on("Client-list-chat", async function (data) {
+    console.log(data);
+    const room = await Room.findOne({
+      _id: mongoose.Types.ObjectId(data),
+    }).populate("message.author");
+    // console.log(room.name);
+
+    socket.join(room.name);
+    socket.emit("Server-send-list-chat", {
+      message: room.message
+    });
+  });
+
+  socket.on("Client-list-chat", async function (data) {
+    const room = await Room.findOne({
+      _id: mongoose.Types.ObjectId(data),
+    }).populate("message.author");
+    // console.log(room.name);
+
+    socket.join(room.name);
+    socket.emit("Server-send-list-chat", {
+      message: room.message
+    });
+  });
+
+  socket.on("Client-send-message", async function (data) {
+    // if (req.user._id === data.userid) {
+      let room = await Room.findOne({
+        _id: mongoose.Types.ObjectId(data.roomid),
+      });
+      if (!room) {
+        socket.emit("Notification", "Do not find room!");
+      }
+      room.message.push({ content: data.message, author: data.userid });
+      // console.log(room);
+      room.save();
+
+      let foundUser = await User.findOne({_id: mongoose.Types.ObjectId(data.userid)}, 'username')
+
+      io.sockets
+        .in(room.name)
+        .emit("Server-chat", { message: data.message, userid: data.userid, username: foundUser.username});
+    // }
+  });
+});
+
 // =========== SETUP ROUTER ================
 
 app.get("/", (req, res) => {
@@ -69,139 +201,8 @@ app.get("/register", function (req, res) {
 });
 
 app.get("/chat", checkAuthenticated, async function (req, res) {
-  // ============= SOCKET.IO =================
-  try {
-    var listRoom = await User.findOne({ _id: req.user._id }, "rooms");
-  } catch (error) {
-    console.log(error);
-  }
-  // var io = req.app.get('socketio');
-  io.on("connection", function (socket) {
-    // socket.id = req.user._id;
-    socket.user = req.user;
-    socket.rooms = listRoom;
-
-    console.log(socket.id + " connected...");
-
-    socket.on("disconnect", function () {
-      console.log(socket.id + " disconnected...");
-    });
-
-    socket.on("Client-get-myinfo", function () {
-      socket.emit("Server-send-my-username", {
-        username: req.user.username,
-        socketid: socket.id,
-        userid: req.user._id,
-      });
-    });
-
-    socket.on("Client-create-room", async function (data) {
-      // console.log(data);
-
-      let exRoom = await Room.findOne({ name: data });
-      // console.log(exRoom);
-
-      if (exRoom) {
-        // socket.emit("Notification", "Room has already existed");
-
-        let listRoom = await User.find({
-          _id: mongoose.Types.ObjectId(req.user._id),
-        })
-          .populate("rooms")
-          .exec();
-
-        const foundRoom = listRoom[0].rooms.find((element) => element.name === data);
-        // console.log(foundRoom);
-        if (!foundRoom) {
-          listRoom[0].rooms.push({
-            _id: mongoose.Types.ObjectId(exRoom._id),
-            name: data,
-          });
-          listRoom[0].save()
-          socket.emit("Server-send-list-room", listRoom[0].rooms);
-
-        }
-        else {
-          socket.emit("Notification", "Room has already existed");
-        }
-
-
-        socket.join(data);
-      } else {
-        const room = new Room({
-          name: data,
-        });
-
-        room.save().then(async function () {
-          let user = await User.findOne({
-            _id: mongoose.Types.ObjectId(req.user._id),
-            rooms: mongoose.Types.ObjectId(room._id),
-          });
-          if (!user) {
-            User.updateOne(
-              { _id: mongoose.Types.ObjectId(req.user._id) },
-              { $push: { rooms: room._id } },
-              (err, doc) => {
-                if (err) console.log(err);
-              }
-            );
-          } else {
-            // console.log(user);
-          }
-          roomid = room._id;
-        });
-
-        let listRoom = await User.find({
-          _id: mongoose.Types.ObjectId(req.user._id),
-        })
-          .populate("rooms")
-          .exec();
-        listRoom[0].rooms.push({
-          _id: mongoose.Types.ObjectId(room._id),
-          name: data,
-        });
-
-        listRoom[0].save();
-
-        socket.emit("Server-send-list-room", listRoom[0].rooms);
-
-        socket.join(data);
-      }
-    });
-
-    socket.on("Client-list-chat", async function (data) {
-      const room = await Room.findOne({
-        _id: mongoose.Types.ObjectId(data),
-      }).populate("message.author");
-      // console.log(room.name);
-
-      socket.join(room.name);
-      socket.emit("Server-send-list-chat", {
-        message: room.message,
-        user: req.user,
-      });
-    });
-
-    socket.on("Client-send-message", async function (data) {
-      console.log(data.socketid + " " + socket.id);
-      if (req.user._id === data.userid) {
-        let room = await Room.findOne({
-          _id: mongoose.Types.ObjectId(data.roomid),
-        });
-        if (!room) {
-          socket.emit("Notification", "Do not find room!");
-        }
-        room.message.push({ content: data.message, author: data.userid });
-        room.save();
-
-        console.log(io.sockets.adapter.rooms);
-
-        io.sockets
-          .in(room.name)
-          .emit("Server-chat", { message: data.message, user: req.user });
-      }
-    });
-  });
+  res.cookie("userid", req.user._id)
+  res.cookie("username", req.user.name)
 
   let listRoom1 = await User.find({
     _id: mongoose.Types.ObjectId(req.user._id),
