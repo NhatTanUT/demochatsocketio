@@ -215,10 +215,13 @@ body{
 
 .btn-send {
     cursor: pointer;
+    padding: 0;
 }
 
 .btn-send-img {
     cursor: pointer;
+    padding: 0;
+
 }
 
 .btn-create-room {
@@ -256,6 +259,11 @@ body{
 .chatImg {
     margin-bottom: 0px;
 }
+
+.input-send {
+    padding: 0;
+}
+
 
 
 @media only screen and (max-width: 767px) {

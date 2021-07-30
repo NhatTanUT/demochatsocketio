@@ -34,6 +34,13 @@
       integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
       crossorigin="anonymous"
     ></script>
+
+    <!-- emoji picker -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.1/emojionearea.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.1/emojionearea.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -57,8 +64,7 @@
               <ul class="list-unstyled chat-list mt-2 mb-0">
                 <h6><i class="fas fa-comments"></i> Room Name:</h6>
                 <div id="listRoom">
-                  <% listRoom.forEach((e)=> {%>
-                  <% if (e.type !== 'user') { %>
+                  <% listRoom.forEach((e)=> {%> <% if (e.type !== 'user') { %>
                   <li class="clearfix" onclick="clickRoom('<%=e._id%>')">
                     <img src="<%=e.roomImage%>" alt="avatar" />
                     <div class="about">
@@ -68,8 +74,7 @@
                       </div>
                     </div>
                   </li>
-                  <%}%>
-                  <% })%>
+                  <%}%> <% })%>
                   <!-- <li class="clearfix active">
                             <img src="/img/avatar2.png" alt="avatar">
                             <div class="about">
@@ -82,7 +87,7 @@
                 <!-- Chưa cập nhật chức năng chat cá nhân -->
                 <h6 style="padding-top: 1em">
                   <i class="fas fa-users"></i> Users:
-                </h6> 
+                </h6>
                 <div id="listUser">
                   <!-- <li class="clearfix">
                     <img src="/img/avatar3.png" alt="avatar" />
@@ -121,7 +126,7 @@
                       </div>
                     </div>
                   </li> -->
-                </div> 
+                </div>
               </ul>
             </div>
             <div class="chat">
@@ -159,13 +164,17 @@
                 <ul class="m-b-0" id="list-chat"></ul>
               </div>
               <div class="chat-message clearfix">
-                <div class="input-group mb-0">
-                  <input
+                <div class="input-group row input-send">
+                  <!-- cần tối ưu lại kích thước các cột -->
+                  <div style="width: 85%;" class="input-group-prepend">
+                    <input
                     type="text"
                     class="form-control txt-chat"
                     placeholder="Enter text here..."
                   />
-                  <div class="input-group-prepend btn-send-img">
+                  </div>
+                  
+                  <div class="input-group-prepend btn-send-img ">
                     <span class="input-group-text">
                       <label for="chatImage" class="chatImg"
                         ><i class="fas fa-images" style="cursor: pointer"></i
@@ -202,10 +211,13 @@
       clickRoom1(id);
     };
     window.redirectTo = function redirectTo(url) {
-      redirectTo1(url)
-    }
+      redirectTo1(url);
+    };
     window.clickUser = function clickUser(id) {
-      clickUser1(id)
-    }
+      clickUser1(id);
+    };
+    $(".txt-chat").emojioneArea({
+      pickerPosition: "top",
+    });
   </script>
 </html>
