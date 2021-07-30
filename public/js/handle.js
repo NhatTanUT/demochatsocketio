@@ -1,34 +1,28 @@
 import { createNotification } from "/js/notification.js";
 
 var socket = io(window.location.host);
-var currentRoomId = ""
-var myUsername = ''
-var socketid = ''
+var currentRoomId = "";
+var chatuserid = ""
+var myUsername = "";
+var socketid = "";
 
-var userid = document.cookie.split('; ')
-.find(row => row.startsWith('userid='))
-.split('=')[1];
-var username = document.cookie.split('; ')
-.find(row => row.startsWith('username='))
-.split('=')[1];
-
-
-// socket.on("Server-send-my-username", function (data) {
-//     myUsername = data.username
-//     socketid = data.socketid
-//     userid = data.userid
-// })
+var userid = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("userid="))
+  .split("=")[1];
 
 socket.on("Server-send-list-room", function (data) {
-  console.log(data);
   $("#listRoom").html("");
+  // console.log(data);
   data.forEach((element) => {
-    console.log(element);
-    $("#listRoom")
+    if (element.type !== 'user') {
+      $("#listRoom")
       .append(`<li class='clearfix' onclick="clickRoom('${element._id}')">
-        <img src='/img/avatar1.png' alt='avatar'><div class='about'><div class="name roomname ${element._id}">
+        <img src='${element.roomImage}' alt='avatar'><div class='about'><div class="name roomname ${element._id}">
         ${element.name}</div><div class='status'> <i class='fa fa-circle offline'></i> left 7 mins ago 
         </div></div></li>`);
+    }
+    
   });
 });
 
@@ -37,84 +31,255 @@ socket.on("Notification", function (data) {
 });
 
 socket.on("Server-send-list-chat", function (data) {
-  
+  // console.log(data);
+  currentRoomId = data.currentRoomId
+  $("#roomImage").attr("src", data.roomImage);
 
   $("#list-chat").html("");
   // let username = data.user.username;
   data.message.forEach((element) => {
-    if (element.author._id === userid) { // nếu là user chính chủ thì nằm bên phải
-      $("#list-chat").append(`<li class="clearfix">
+    if (element.content.startsWith("/uploads/")) {
+      if (element.author._id === userid) {
+        // nếu là user chính chủ thì nằm bên phải
+        $("#list-chat").append(`<li class="clearfix">
+        <div class="message-data text-right">
+          <span class="message-data-time">${element.author.username}</span>
+          <img src="${element.author.avatar}" alt="avatar" />
+        </div>
+        <div class="message other-message float-right">
+        <img src="${element.content}" style="width: 300px; height: auto; cursor: pointer" onclick="redirectTo('${element.content}')" />
+        </div>
+      </li>
+        `);
+      } else {
+        $("#list-chat").append(`<li class="clearfix">
+        <div class="message-data">
+          <img src="${element.author.avatar}" alt="avatar" />
+          <span class="message-data-time">${element.author.username}</span>
+        </div>
+        <div class="message my-message">
+        <img src="${element.content}" style="width: 300px; height: auto; cursor: pointer" onclick="redirectTo('${element.content}')" />
+        </div>
+      </li>
+        `);
+      }
+    } else {
+      if (element.author._id === userid) {
+        // nếu là user chính chủ thì nằm bên phải
+        $("#list-chat").append(`<li class="clearfix">
     <div class="message-data text-right">
-      <span class="message-data-time">${element.author.username}, 10:10 AM, Today</span>
-      <img src="/img/avatar3.png" alt="avatar" />
+      <span class="message-data-time">${element.author.username}</span>
+      <img src="${element.author.avatar}" alt="avatar" />
     </div>
     <div class="message other-message float-right">
       ${element.content}
     </div>
   </li>
     `);
-    } else {
-      $("#list-chat").append(`<li class="clearfix">
+      } else {
+        $("#list-chat").append(`<li class="clearfix">
     <div class="message-data">
-      <img src="/img/avatar1.png" alt="avatar" />
-      <span class="message-data-time">${element.author.username}, 10:10 AM, Today</span>
+      <img src="${element.author.avatar}" alt="avatar" />
+      <span class="message-data-time">${element.author.username}</span>
     </div>
     <div class="message my-message">
       ${element.content}
     </div>
   </li>
     `);
+      }
     }
   });
 
-  $('#list-chat').scrollTop($('#list-chat')[0].scrollHeight);
+  $("#list-chat").scrollTop($("#list-chat")[0].scrollHeight);
 });
 
 socket.on("Server-chat", function (data) {
   // let username1 = data.user.username;
-    if (userid === data.userid) { // nếu là user chính chủ thì nằm bên phải
+  if (data.message.startsWith("/uploads/")) {
+    if (userid === data.userid) {
+      // nếu là user chính chủ thì nằm bên phải
       $("#list-chat").append(`<li class="clearfix">
-    <div class="message-data text-right">
-      <span class="message-data-time">${data.username}, 10:10 AM, Today</span>
-      <img src="/img/avatar3.png" alt="avatar" />
-    </div>
-    <div class="message other-message float-right">
-      ${data.message}
-    </div>
-  </li>
-    `);
+      <div class="message-data text-right">
+        <span class="message-data-time">${data.username}</span>
+        <img src="${data.avatar}" alt="avatar" />
+      </div>
+      <div class="message other-message float-right">
+      <img src="${data.message}" style="width: 300px; height: auto; cursor: pointer" onclick="redirectTo('${data.message}')" />
+      </div>
+    </li>
+      `);
     } else {
       $("#list-chat").append(`<li class="clearfix">
-    <div class="message-data">
-      <img src="/img/avatar1.png" alt="avatar" />
-      <span class="message-data-time">${data.username}, 10:10 AM, Today</span>
-    </div>
-    <div class="message my-message">
-      ${data.message}
-    </div>
-  </li>
-    `);
+      <div class="message-data">
+        <img src="${data.avatar}" alt="avatar" />
+        <span class="message-data-time">${data.username}</span>
+      </div>
+      <div class="message my-message">
+      <img src="${data.message}" style="width: 300px; height: auto; cursor: pointer" onclick="redirectTo('${data.message}')" />
+      </div>
+    </li>
+      `);
     }
-})
+  } else {
+    if (userid === data.userid) {
+      // nếu là user chính chủ thì nằm bên phải
+      $("#list-chat").append(`<li class="clearfix">
+      <div class="message-data text-right">
+        <span class="message-data-time">${data.username}</span>
+        <img src="${data.avatar}" alt="avatar" />
+      </div>
+      <div class="message other-message float-right">
+        ${data.message}
+      </div>
+    </li>
+      `);
+    } else {
+      $("#list-chat").append(`<li class="clearfix">
+      <div class="message-data">
+        <img src="${data.avatar}" alt="avatar" />
+        <span class="message-data-time">${data.username}</span>
+      </div>
+      <div class="message my-message">
+        ${data.message}
+      </div>
+    </li>
+      `);
+    }
+  }
 
-$(document).ready(function () {
-  console.log(userid);
-  console.log(username)
-    // lấy username của chính mình
-    socket.emit("Client-get-myinfo")
-
-  $(".btn-create-room").click(function () {
-    socket.emit("Client-create-room", {roomname: $(".txt-create-room").val(), userid: userid});
-  });
-  $(".btn-send").click(function() {
-    console.log(currentRoomId);
-      socket.emit("Client-send-message", {message: $('.txt-chat').val(), roomid: currentRoomId, userid: userid})
-      $('.txt-chat').val("")
-    })
+  $("#list-chat").scrollTop($("#list-chat")[0].scrollHeight);
 });
 
+socket.on("Has-somebody-online", function (data) {
+  // console.log(data);
+  $("#listUser").html("");
+  data.forEach((e) => {
+    if (e.userid !== userid)
+      $("#listUser").append(`<li class="clearfix info-user ${e.userid}" onclick="clickUser('${e.userid}')">
+  <img src="${e.avatar.replace("%5C", "/")}" alt="avatar" />
+  <div class="about">
+    <div class="name">${e.username}</div>
+    <div class="status">
+      <i class="fa fa-circle online"></i> online
+    </div>
+  </div>
+</li>`);
+  });
+});
+
+$(document).ready(function () {
+  var userid = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("userid="))
+    .split("=")[1];
+  var username = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("username="))
+    .split("=")[1];
+  var avatar = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("avatar="))
+    .split("=")[1];
+
+  socket.emit("login", { userid: userid, username: username, avatar: avatar });
+
+  // lấy username của chính mình
+  socket.emit("Client-get-myinfo");
+
+  $(".btn-create-room").click(function () {
+    socket.emit("Client-create-room", {
+      roomname: $(".txt-create-room").val(),
+      userid: userid,
+    });
+  });
+  $(".btn-send").click(function () {
+    if (currentRoomId !== "" || chatuserid !== "") {
+      // console.log(currentRoomId);
+      socket.emit("Client-send-message", {
+        message: $(".txt-chat").val(),
+        roomid: currentRoomId,
+        userid: userid,
+      });
+      $(".txt-chat").val("");
+    } else {
+      createNotification(
+        "{position: 'top left',type: 'warning'}",
+        "Please choose a room chat or user chat !"
+      );
+    }
+  });
+
+  $("#chatImage").change(function () {
+    if (currentRoomId === "" && chatuserid === "") {
+      createNotification(
+        "{position: 'top left',type: 'warning'}",
+        "Please choose a room chat or user chat !"
+      );
+    } else {
+      // var a = document.getElementById('chatImage').files[0]
+      var data = new FormData($("#chatimgform")[0]);
+      // console.log(data);
+      $.ajax({
+        type: "POST",
+        enctype: "multipart/form-data",
+        url: "/chat/img",
+        data: data,
+        processData: false,
+        contentType: false,
+        cache: false,
+        // timeout: 600000,
+        success: function (data1) {
+  //         $("#list-chat").append(`<li class="clearfix">
+  //   <div class="message-data text-right">
+  //     <span class="message-data-time">${username}</span>
+  //     <img src="${avatar.replace("%5C", "/")}" alt="avatar" />
+  //   </div>
+  //   <div class="message other-message float-right">
+  //     <img src="${
+  //       data1.path
+  //     }" style="width: 300px; height: auto; cursor: pointer" onclick="redirectTo('${
+  //           data1.origin
+  //         }')" />
+  //   </div>
+  // </li>
+  //   `);
+          socket.emit("Client-send-message", {
+            message: "/uploads/" + data1.origin,
+            roomid: currentRoomId,
+            userid: userid,
+          });
+        },
+        error: function (e) {
+          createNotification(
+            "{position: 'top left',type: 'danger'}",
+            "Error upload image"
+          );
+        },
+      });
+    }
+
+    // $.post('/chat/img', {chatImage: formData})
+  });
+});
+
+export function redirectTo1(url) {
+  // console.log(url);
+  if (url.startsWith('/uploads/')) {
+    window.location.href = url
+  }
+  else 
+    window.location.href = "/uploads/" + url;
+}
+
 export function clickRoom1(id) {
-  $('#currentName').html($('.roomname.' + id).html())
-  socket.emit("Client-list-chat", id);
-  currentRoomId = id
+  $("#currentName").html($(".roomname." + id).html());
+  socket.emit("Client-list-chat-room", id);
+  currentRoomId = id;
+}
+
+export function clickUser1(id) {
+  $("#currentName").html($(".info-user." + id + " > .about > .name").html());
+  socket.emit("Client-list-chat-user", {myId: userid, userid: id})
+  chatuserid = id
 }

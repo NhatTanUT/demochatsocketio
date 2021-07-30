@@ -12,6 +12,16 @@ const roomSchema = schema({
         min: 3,
         max: 255
     },
+    roomImage: {
+        type: String,
+        required: true,
+        default: '/img/room.png'
+    },
+    type: {
+        type: String,
+        enum : ['room','user'],
+        required: true
+    },
     message: [{
         content: {
             type: String,

@@ -1,5 +1,6 @@
 // config/passport.js
 // load những thứ chúng ta cần
+const multer = require('multer')
 var LocalStrategy = require('passport-local').Strategy;
 // load  user model
 var User = require('../models/user.model');
@@ -48,6 +49,12 @@ module.exports = function (passport) {
                         newUser.username = username;
                         newUser.password = newUser.generateHash(password);
                         newUser.name = req.body.name
+                        if (req.file) {
+                            newUser.avatar = req.file.path
+                        }
+                        else {
+                            newUser.avatar = '/img/anonymous-user.png'
+                        }
                         // lưu user
                         newUser.save(function (err) {
                             if (err)

@@ -217,16 +217,20 @@ body{
     cursor: pointer;
 }
 
+.btn-send-img {
+    cursor: pointer;
+}
+
 .btn-create-room {
     cursor: pointer;
 }
 
 #listRoom {
-    height: 24.425rem;
+    height: 12rem;
     overflow: auto;
 }
 #listUser {
-    height: 50%;
+    height: 12rem;
     overflow: auto;
 }
 
@@ -244,6 +248,14 @@ body{
     height: 37.5rem;
 }
 
+.avatar {
+    border-bottom-left-radius: 50%;
+    border-top-left-radius: 50%;
+}
+
+.chatImg {
+    margin-bottom: 0px;
+}
 
 
 @media only screen and (max-width: 767px) {

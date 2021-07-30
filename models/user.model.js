@@ -28,7 +28,12 @@ const userSchema = schema({
     rooms: [{
         type: String,
         ref: Room
-    }]
+    }],
+    avatar: {
+        type: String,
+        required: true,
+        default: '/img/anonymous-user.png'
+    }
 })
 
 userSchema.methods.generateHash = function (password) {
