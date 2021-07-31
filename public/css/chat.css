@@ -264,6 +264,11 @@ body{
     padding: 0;
 }
 
+.user-writing {
+    position: absolute;
+    top: -30px;
+    left: 10px;
+}
 
 
 @media only screen and (max-width: 767px) {

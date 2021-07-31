@@ -67,13 +67,13 @@ io.on("connection", function (socket) {
   console.log(socket.id + " connected...");
 
   socket.on("login", function (data) {
-    data.socketid = socket.id
+    data.socketid = socket.id;
     listUserOnline.push(data);
     io.sockets.emit("Has-somebody-online", listUserOnline);
   });
 
   socket.on("disconnect", function () {
-    listUserOnline = listUserOnline.filter((e) => e.socketid !== socket.id)
+    listUserOnline = listUserOnline.filter((e) => e.socketid !== socket.id);
     // console.log(listUserOnline);
     socket.broadcast.emit("Has-somebody-online", listUserOnline);
     console.log(socket.id + " disconnected...");
@@ -112,7 +112,7 @@ io.on("connection", function (socket) {
     } else {
       const room = new Room({
         name: data.roomname,
-        type: 'room'
+        type: "room",
       });
 
       // console.log(room);
@@ -164,7 +164,7 @@ io.on("connection", function (socket) {
     socket.emit("Server-send-list-chat", {
       message: room.message,
       roomImage: room.roomImage,
-      currentRoomId: room._id
+      currentRoomId: room._id,
     });
   });
 
@@ -173,30 +173,33 @@ io.on("connection", function (socket) {
     // Kết hợp 2 id của 2 người tạo thành 1 cái tên
     // Có 2 trường hợp tên (A trước rồi B hoặc B trước rồi A)
     const roomname1 = data.myId + " and " + data.userid;
-    const roomname2 = data.userid + " and " + data.myId
+    const roomname2 = data.userid + " and " + data.myId;
     const room = await Room.findOne({
-      $or: [{
-        name: (roomname1)
-      }, {
-        name: (roomname2)
-      }]
-      
-    }).populate("message.author").exec();
+      $or: [
+        {
+          name: roomname1,
+        },
+        {
+          name: roomname2,
+        },
+      ],
+    })
+      .populate("message.author")
+      .exec();
     // console.log(room.name);
     if (room) {
       if (room.name === roomname1) {
-        socket.join(roomname1)
+        socket.join(roomname1);
       } else if (room.name === roomname2) {
-        socket.join(roomname2)
+        socket.join(roomname2);
       }
     }
-    
 
     // Nếu tìm không có thì tạo phòng mới
     if (!room) {
       const room = new Room({
         name: roomname1,
-        type: 'user'
+        type: "user",
       });
 
       // console.log(room);
@@ -223,18 +226,22 @@ io.on("connection", function (socket) {
     }
 
     const room1 = await Room.findOne({
-      $or: [{
-        name: (roomname1)
-      }, {
-        name: (roomname2)
-      }]
-      
-    }).populate("message.author").exec();
+      $or: [
+        {
+          name: roomname1,
+        },
+        {
+          name: roomname2,
+        },
+      ],
+    })
+      .populate("message.author")
+      .exec();
 
     socket.emit("Server-send-list-chat", {
       message: room1.message,
       roomImage: room.roomImage,
-      currentRoomId: room._id
+      currentRoomId: room._id,
     });
   });
 
@@ -248,7 +255,7 @@ io.on("connection", function (socket) {
     socket.emit("Server-send-list-chat", {
       message: room.message,
       roomImage: room.roomImage,
-      currentRoomId: room._id
+      currentRoomId: room._id,
     });
   });
 
@@ -276,7 +283,22 @@ io.on("connection", function (socket) {
       username: foundUser.username,
       avatar: foundUser.avatar,
     });
+
     // }
+  });
+
+  socket.on("Client-writing", async function (data) {
+    if (data.roomid !== "") {
+      let room = await Room.findOne({ _id: mongoose.Types.ObjectId(data.roomid) });
+      if (room) {
+        socket.broadcast
+          .in(room.name)
+          .emit("Server-has-somebody-writing", {
+            message: data.message,
+            roomid: room._id,
+          });
+      }
+    }
   });
 });
 
@@ -341,7 +363,6 @@ app.get("/chat", checkAuthenticated, async function (req, res) {
 app.post("/chat/img", upload.single("chatImage"), async function (req, res) {
   // console.log(req.file);
   if (req.file) {
-    
     res
       .status(200)
       .send({ path: req.file.path, origin: req.file.originalname });
