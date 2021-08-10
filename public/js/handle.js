@@ -188,9 +188,11 @@ socket.on("Server-has-somebody-writing", function (data) {
 
 
 socket.on("Have-calling", function (data) {
-  if (window.confirm("Calling...")) {
+  console.log(data);
+  // let r = window.confirm("Calling...")
+  // if (r === true) {
     window.open('/call?from=' + data.socketidA, '_blank');
-  } 
+  // } 
 
 })
 

@@ -1,10 +1,5 @@
 function openLocalStream() {
-  const config = { audio: false, video: true };
-  return navigator.mediaDevices.getUserMedia(config);
-}
-
-function openRemoteStream() {
-  const config = { audio: false, video: true };
+  const config = { audio: true, video: true };
   return navigator.mediaDevices.getUserMedia(config);
 }
 
