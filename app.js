@@ -57,14 +57,17 @@ app.use(passport.session());
 
 // ============ SOCKET.IO =================
 const server = http.Server(app);
-const io = require("socket.io")(server);
+var io = require("socket.io")(server);
 
 app.set("socketio", io);
 
 var listUserOnline = [];
 
+var mySocketio = ""
+
 io.on("connection", function (socket) {
   console.log(socket.id + " connected...");
+  mySocketio = socket.id
 
   socket.on("login", function (data) {
     data.socketid = socket.id;
@@ -300,6 +303,19 @@ io.on("connection", function (socket) {
       }
     }
   });
+
+  // Call
+  socket.on("Client-call-to", function (data) {
+    // console.log(data);
+    let socketid = String(data.socketidB)
+    io.to(socketid).emit("Have-calling", data)
+  })
+
+  socket.on('Client-receive-call', function (data) {
+    // console.log(data);
+    let socketid = String(data.socketidA)
+    io.to(socketid).emit("Agree-call", data)
+  })
 });
 
 // =========== SETUP ROUTER ================
@@ -307,6 +323,22 @@ io.on("connection", function (socket) {
 app.get("/", (req, res) => {
   res.redirect("/login");
 });
+
+app.get('/call', (req, res) => {
+  // res.redirect('/call/' + req.user._id)
+  if (req.query.to) {
+    const found = listUserOnline.find(element => element.userid === req.query.to);
+    res.render('call', {socketid: found.socketid})
+  }
+  else if (req.query.from) {
+    res.render('call', {socketid: req.query.from})
+  }
+})
+
+// app.get('/call/:socketid', (req, res) => {
+//   console.log(req.params.socketid);
+//   res.render('call', {socketid: req.params.socketid})
+// })
 
 app.get("/login", function (req, res) {
   res.render("login");
@@ -350,6 +382,7 @@ app.get("/chat", checkAuthenticated, async function (req, res) {
   res.cookie("userid", req.user._id);
   res.cookie("username", req.user.username);
   res.cookie("avatar", req.user.avatar);
+  res.cookie("socketid", mySocketio)
 
   let listRoom1 = await User.find({
     _id: mongoose.Types.ObjectId(req.user._id),

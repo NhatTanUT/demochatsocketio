@@ -11,6 +11,11 @@ var userid = document.cookie
   .find((row) => row.startsWith("userid="))
   .split("=")[1];
 
+var socketid = document.cookie
+  .split("; ")
+  .find((row) => row.startsWith("socketid="))
+  .split("=")[1];
+
 socket.on("Server-send-list-room", function (data) {
   $("#listRoom").html("");
   // console.log(data);
@@ -181,7 +186,17 @@ socket.on("Server-has-somebody-writing", function (data) {
    {$(".user-writing").html(data.message);}
 });
 
+
+socket.on("Have-calling", function (data) {
+  if (window.confirm("Calling...")) {
+    window.open('/call?from=' + data.socketidA, '_blank');
+  } 
+
+})
+
 $(document).ready(function () {
+  $('.btn-video-call').hide()
+
   var userid = document.cookie
     .split("; ")
     .find((row) => row.startsWith("userid="))
@@ -308,10 +323,16 @@ export function clickRoom1(id) {
   $("#currentName").html($(".roomname." + id).html());
   socket.emit("Client-list-chat-room", id);
   currentRoomId = id;
+
+  $('.btn-video-call').hide()
 }
 
 export function clickUser1(id) {
   $("#currentName").html($(".info-user." + id + " > .about > .name").html());
   socket.emit("Client-list-chat-user", { myId: userid, userid: id });
   chatuserid = id;
+
+  $('.btn-video-call').show()
+  $('.btn-video-call').attr('href', '/call?to=' + id)
+
 }
