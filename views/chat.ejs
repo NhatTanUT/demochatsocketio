@@ -37,23 +37,25 @@
 
     <!-- emoji picker -->
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.1/emojionearea.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.min.css"
       rel="stylesheet"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.1/emojionearea.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
-    
-</head>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.1/emojionearea.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script> -->
+  </head>
   <body>
-
     <div class="container">
       <div class="nav">
-        <h2 style="display: inline;">Hello, <%=user.username%></h2>
-      <a href="/logout" style="position: absolute; right: 200px;; " class="text-right btn btn-outline-warning btn-logout"
-                      >Logout <i class="fas fa-sign-out-alt"></i
-                    ></a>
+        <h2 style="display: inline">Hello, <%=user.username%></h2>
+        <a
+          href="/logout"
+          style="position: absolute; right: 200px ;"
+          class="text-right btn btn-outline-warning btn-logout"
+          >Logout <i class="fas fa-sign-out-alt"></i
+        ></a>
       </div>
-      
+
       <div class="row clearfix">
         <div class="col-lg-12">
           <div class="card chat-app">
@@ -163,8 +165,12 @@
                     <!-- <a href="javascript:void(0);" class="btn btn-outline-secondary"><i class="fa fa-camera"></i></a>
                             <a href="javascript:void(0);" class="btn btn-outline-primary"><i class="fa fa-image"></i></a>
                             <a href="javascript:void(0);" class="btn btn-outline-info"><i class="fa fa-cogs"></i></a> -->
-                    <a href="/call" target="_blank" class="btn btn-outline-success btn-video-call"
-                      ><i class="fas fa-video"></i> Video Call</a>
+                    <a
+                      href="/call"
+                      target="_blank"
+                      class="btn btn-outline-success btn-video-call"
+                      ><i class="fas fa-video"></i> Video Call</a
+                    >
                   </div>
                 </div>
               </div>
@@ -172,22 +178,23 @@
                 <ul class="m-b-0" id="list-chat"></ul>
               </div>
               <div class="chat-message clearfix">
-                
                 <div class="input-group row input-send">
-                  <div class="input-group-prepend user-writing">
-                    
-                  </div>
+                  <div class="input-group-prepend user-writing"></div>
 
                   <!-- cần tối ưu lại kích thước các cột -->
-                  <div style="width: 85%;" class="input-group-prepend input-chat">
+                  <div
+                    style="width: 85%"
+                    class="input-group-prepend input-chat"
+                  >
                     <input
-                    type="text"
-                    class="form-control txt-chat"
-                    placeholder="Enter text here..."
-                  />
+                      type="text"
+                      class="form-control txt-chat"
+                      id="txt-chat"
+                      placeholder="Enter text here..."
+                    />
                   </div>
-                  
-                  <div class="input-group-prepend btn-send-img ">
+
+                  <div class="input-group-prepend btn-send-img">
                     <span class="input-group-text">
                       <label for="chatImage" class="chatImg"
                         ><i class="fas fa-images" style="cursor: pointer"></i
@@ -229,8 +236,10 @@
     window.clickUser = function clickUser(id) {
       clickUser1(id);
     };
-    $(".txt-chat").emojioneArea({
-      pickerPosition: "top",
+    $(document).ready(function () {
+      $("#txt-chat").emojioneArea({
+        pickerPosition: "top"
+      });
     });
   </script>
 </html>
