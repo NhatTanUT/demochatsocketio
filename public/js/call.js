@@ -34,12 +34,20 @@ function playStream(idVideoTag, stream) {
 
 var socket = io(window.location.host);
 
-let socketidB = $("#remoteid").html();
+let socketidB = document.cookie
+.split("; ")
+.find((row) => row.startsWith("socketid="))
+.split("=")[1];
+
+var username = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("username="))
+    .split("=")[1];
 
 const peer = new Peer();
 
 peer.on("open", (id) => {
-  $("#my-peer").append(id);
+  // $("#my-peer").append(id);
   // Get query string
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
@@ -49,9 +57,10 @@ peer.on("open", (id) => {
     openLocalStream().then((localstream) => {
       playStream("localStream", localstream);
 
-      let mypeer = $("#my-peer").html();
+      // let mypeer = $("#my-peer").html();
       socket.emit("Client-call-to", {
         myPeerid: id,
+        nameA: username,
         socketidB: socketidB,
         socketidA: socket.id,
       });

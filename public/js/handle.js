@@ -186,13 +186,20 @@ socket.on("Server-has-somebody-writing", function (data) {
    {$(".user-writing").html(data.message);}
 });
 
+async function show_confirm(data) {
+  let r = window.confirm(data.nameA + " calling...")
+  if (r === true) {
+    window.open('/call?from=' + data.socketidA, '_blank');
+  } 
+}
 
-socket.on("Have-calling", function (data) {
+socket.on("Have-calling", async function (data) {
   console.log(data);
   // let r = window.confirm("Calling...")
   // if (r === true) {
-    window.open('/call?from=' + data.socketidA, '_blank');
+  //   window.open('/call?from=' + data.socketidA, '_blank');
   // } 
+  await show_confirm(data)
 
 })
 

@@ -328,11 +328,17 @@ app.get('/call', (req, res) => {
   // res.redirect('/call/' + req.user._id)
   if (req.query.to) {
     const found = listUserOnline.find(element => element.userid === req.query.to);
-    res.render('call', {socketid: found.socketid})
+    res.cookie("socketid", found.socketid)
+    res.render('call')
   }
   else if (req.query.from) {
-    res.render('call', {socketid: req.query.from})
+    res.cookie("socketid", req.query.from)
+    res.render('call')
   }
+})
+
+app.get("/demo", function (req, res) {
+  res.render('demo')
 })
 
 // app.get('/call/:socketid', (req, res) => {

@@ -15,12 +15,37 @@
   </head>
   <body>
     <h3 id="my-peer"></h3>
-    <video id="localStream" width="300" muted autoplay></video>
+    <video id="localStream" width="25%" muted autoplay style="position: absolute; right: 1%; bottom: 2%; border-radius: 5%; z-index: 1000;"></video>
     <br /><br />
-    <h3 id="remoteid"><%=socketid%></h3>
-    <img id='calling-gif' src="https://www.hicomaccounting.com.au/assets/images/CallUs.gif" alt="" srcset="">
-    <video id="remoteStream" width="500" autoplay></video>
+    <h3 id="remoteid"></h3>
+    <img id='calling-gif' src="https://www.hicomaccounting.com.au/assets/images/CallUs.gif" alt="" srcset="" style="/* Make video to at least 100% wide and tall */
+    /* min-width: 100%;  */
+    min-height: 100%; 
+    
+    /* Setting width & height to auto prevents the browser from stretching or squishing the video */
+    width: auto;
+    height: auto;
+    
+    /* Center the video */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);">
+    <video id="remoteStream" autoplay style="/* Make video to at least 100% wide and tall */
+    /* min-width: 100%;  */
+    min-height: 100%; 
+    
+    /* Setting width & height to auto prevents the browser from stretching or squishing the video */
+    width: auto;
+    height: auto;
+    
+    /* Center the video */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);"></video>
     <br /><br />
+    
   </body>
   <script src="/js/call.js"></script>
 </html>
