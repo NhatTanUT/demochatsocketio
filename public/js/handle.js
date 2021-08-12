@@ -187,10 +187,23 @@ socket.on("Server-has-somebody-writing", function (data) {
 });
 
 async function show_confirm(data) {
-  let r = window.confirm(data.nameA + " calling...")
-  if (r === true) {
-    window.open('/call?from=' + data.socketidA, '_blank');
-  } 
+  swal("Calling...", {
+    buttons: {
+      confirm: "Let's do it!",
+      cancel: true,
+    },
+    title: data.nameA,
+    icon: "warning"
+  }).then((e) => {
+    if (e === true) {
+      window.open('/call?from=' + data.socketidA, '_blank');
+    } 
+  })
+
+  // let r = window.confirm(data.nameA + " calling...")
+  // if (r === true) {
+  //   window.open('/call?from=' + data.socketidA, '_blank');
+  // } 
 }
 
 socket.on("Have-calling", async function (data) {
