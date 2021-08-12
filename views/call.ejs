@@ -45,7 +45,22 @@
     left: 50%;
     transform: translate(-50%,-50%);"></video>
     <br /><br />
-    
+      <div id="toolbar" style="position: absolute; bottom: 1rem; left: 0; right: 0; text-align: center;">
+        <!-- <img src="/img/end-call-icon.jpg" alt="" style="width: 4.5rem;"> -->
+        <img id="btn-end-call" src="/img/end-call-icon.jpg" alt="" style="width: 5.5rem; cursor: pointer;">
+        <!-- <img src="/img/end-call-icon.jpg" alt="" style="width: 4.5rem;"> -->
+        
+      </div>
   </body>
   <script src="/js/call.js"></script>
+  <script src="/js/prebid-ads.js"></script>
+  <script>
+    setTimeout(function() {
+      if( window.canRunAds === undefined ){
+      // adblocker detected, show fallback
+      alert("AdBlock detect. Please disable")
+      window.location.href = window.location.href
+    }
+    }, 1000)
+  </script>
 </html>

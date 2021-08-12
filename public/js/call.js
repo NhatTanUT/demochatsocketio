@@ -99,3 +99,7 @@ peer.on("open", (id) => {
     });
   }
 });
+
+$('#btn-end-call').click(function() {
+  // socket.emit('Client-end-call', {socket})
+})
