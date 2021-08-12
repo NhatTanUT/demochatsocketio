@@ -41,7 +41,7 @@
       rel="stylesheet"
     />
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.1/emojionearea.min.js"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.js"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script> -->
     
     <!-- notify -->
@@ -54,6 +54,7 @@
       if( window.canRunAds === undefined ){
       // adblocker detected, show fallback
       alert("AdBlock detect. Please disable")
+      
       // window.location.href = window.location.href
     }
     }, 1000)
@@ -250,8 +251,8 @@
     window.redirectTo = function redirectTo(url) {
       redirectTo1(url);
     };
-    window.clickUser = function clickUser(id) {
-      clickUser1(id);
+    window.clickUser = function clickUser(id, socketid) {
+      clickUser1(id, socketid);
     };
     $(document).ready(function () {
       $("#txt-chat").emojioneArea({

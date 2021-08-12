@@ -5,6 +5,7 @@ var currentRoomId = "";
 var chatuserid = "";
 var myUsername = "";
 var socketid = "";
+var chatusersocketid = ""
 
 var userid = document.cookie
   .split("; ")
@@ -124,11 +125,12 @@ socket.on("Server-chat", function (data) {
       </div>
     </li>
       `);
+      // createNotification(
+      //   "{position: 'top left',type: 'success'}",
+      //   data.username + ": đã gửi một hình ảnh!"
+      // );
     }
-    createNotification(
-      "{position: 'top left',type: 'success'}",
-      data.username + ": đã gửi một hình ảnh!"
-    );
+    
   } else {
     if (userid === data.userid) {
       // nếu là user chính chủ thì nằm bên phải
@@ -153,11 +155,12 @@ socket.on("Server-chat", function (data) {
       </div>
     </li>
       `);
+      // createNotification(
+      //   "{position: 'top left',type: 'success'}",
+      //   data.username + " in room: " + data.roomname + ": \n" + data.message
+      // );
     }
-    createNotification(
-      "{position: 'top left',type: 'success'}",
-      data.username + ": " + data.message
-    );
+    
   }
 
   $("#list-chat").scrollTop($("#list-chat")[0].scrollHeight);
@@ -170,8 +173,9 @@ socket.on("Has-somebody-online", function (data) {
     if (e.userid !== userid)
       $("#listUser").append(`<li class="clearfix info-user ${
         e.userid
-      }" onclick="clickUser('${e.userid}')">
+      }" onclick="clickUser('${e.userid}', '${e.socketid}')">
   <img src="${e.avatar.replace("%5C", "/")}" alt="avatar" />
+  <div class="socketid ${e.socketid}"></div>
   <div class="about">
     <div class="name">${e.username}</div>
     <div class="status">
@@ -216,6 +220,13 @@ socket.on("Have-calling", async function (data) {
 
 })
 
+socket.on("Anybody-chat-to", function (data) {
+  createNotification(
+      "{position: 'top left',type: 'success'}",
+      data.username + " in room: " + data.roomname + ": \n" + data.message
+    );
+})
+
 $(document).ready(function () {
   $('.btn-video-call').hide()
 
@@ -257,8 +268,9 @@ $(document).ready(function () {
         message: $(".txt-chat").val(),
         roomid: currentRoomId,
         userid: userid,
+        socketidB: chatusersocketid
       });
-      $(".txt-chat").html("");
+      $('.emojionearea-editor').text("")
     } else {
       createNotification(
         "{position: 'top left',type: 'warning'}",
@@ -349,10 +361,12 @@ export function clickRoom1(id) {
   $('.btn-video-call').hide()
 }
 
-export function clickUser1(id) {
+export function clickUser1(id, socketid) {
+  chatusersocketid = ""
   $("#currentName").html($(".info-user." + id + " > .about > .name").html());
   socket.emit("Client-list-chat-user", { myId: userid, userid: id });
   chatuserid = id;
+  chatusersocketid = socketid 
 
   $('.btn-video-call').show()
   $('.btn-video-call').attr('href', '/call?to=' + id)

@@ -63,11 +63,11 @@ app.set("socketio", io);
 
 var listUserOnline = [];
 
-var mySocketio = ""
+var mySocketio = "";
 
 io.on("connection", function (socket) {
   console.log(socket.id + " connected...");
-  mySocketio = socket.id
+  mySocketio = socket.id;
 
   socket.on("login", function (data) {
     data.socketid = socket.id;
@@ -265,9 +265,9 @@ io.on("connection", function (socket) {
   socket.on("Client-send-message", async function (data) {
     // console.log(data);
     // if (req.user._id === data.userid) {
-    let room = await Room.findOne({
-      _id: mongoose.Types.ObjectId(data.roomid),
-    });
+      var room = await Room.findOne({
+        _id: mongoose.Types.ObjectId(data.roomid),
+      });
     if (!room) {
       socket.emit("Notification", "Do not find room!");
     }
@@ -285,21 +285,31 @@ io.on("connection", function (socket) {
       userid: data.userid,
       username: foundUser.username,
       avatar: foundUser.avatar,
+      roomname: room.name,
     });
 
+    if (room.type === "user") {
+      io.to(data.socketidB).emit("Anybody-chat-to", {
+        message: data.message,
+        userid: data.userid,
+        username: foundUser.username,
+        avatar: foundUser.avatar,
+        roomname: room.name,
+      });
+    }
     // }
   });
 
   socket.on("Client-writing", async function (data) {
     if (data.roomid !== "") {
-      let room = await Room.findOne({ _id: mongoose.Types.ObjectId(data.roomid) });
+      let room = await Room.findOne({
+        _id: mongoose.Types.ObjectId(data.roomid),
+      });
       if (room) {
-        socket.broadcast
-          .in(room.name)
-          .emit("Server-has-somebody-writing", {
-            message: data.message,
-            roomid: room._id,
-          });
+        socket.broadcast.in(room.name).emit("Server-has-somebody-writing", {
+          message: data.message,
+          roomid: room._id,
+        });
       }
     }
   });
@@ -307,15 +317,15 @@ io.on("connection", function (socket) {
   // Call
   socket.on("Client-call-to", function (data) {
     // console.log(data);
-    let socketid = String(data.socketidB)
-    io.to(socketid).emit("Have-calling", data)
-  })
+    let socketid = String(data.socketidB);
+    io.to(socketid).emit("Have-calling", data);
+  });
 
-  socket.on('Client-receive-call', function (data) {
+  socket.on("Client-receive-call", function (data) {
     // console.log(data);
-    let socketid = String(data.socketidA)
-    io.to(socketid).emit("Agree-call", data)
-  })
+    let socketid = String(data.socketidA);
+    io.to(socketid).emit("Agree-call", data);
+  });
 });
 
 // =========== SETUP ROUTER ================
@@ -324,22 +334,23 @@ app.get("/", (req, res) => {
   res.redirect("/login");
 });
 
-app.get('/call', (req, res) => {
+app.get("/call", (req, res) => {
   // res.redirect('/call/' + req.user._id)
   if (req.query.to) {
-    const found = listUserOnline.find(element => element.userid === req.query.to);
-    res.cookie("socketid", found.socketid)
-    res.render('call')
+    const found = listUserOnline.find(
+      (element) => element.userid === req.query.to
+    );
+    res.cookie("socketid", found.socketid);
+    res.render("call");
+  } else if (req.query.from) {
+    res.cookie("socketid", req.query.from);
+    res.render("call");
   }
-  else if (req.query.from) {
-    res.cookie("socketid", req.query.from)
-    res.render('call')
-  }
-})
+});
 
 app.get("/demo", function (req, res) {
-  res.render('demo')
-})
+  res.render("demo");
+});
 
 // app.get('/call/:socketid', (req, res) => {
 //   console.log(req.params.socketid);
@@ -388,7 +399,7 @@ app.get("/chat", checkAuthenticated, async function (req, res) {
   res.cookie("userid", req.user._id);
   res.cookie("username", req.user.username);
   res.cookie("avatar", req.user.avatar);
-  res.cookie("socketid", mySocketio)
+  res.cookie("socketid", mySocketio);
 
   let listRoom1 = await User.find({
     _id: mongoose.Types.ObjectId(req.user._id),
