@@ -12,6 +12,17 @@
       integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh"
       crossorigin="anonymous"
     ></script>
+
+    <script src="/js/prebid-ads.js"></script>
+  <script>
+    setTimeout(function() {
+      if( window.canRunAds === undefined ){
+      // adblocker detected, show fallback
+      alert("AdBlock detect. Please disable")
+      // window.location.href = window.location.href
+    }
+    }, 1000)
+  </script>
   </head>
   <body>
     <h3 id="my-peer"></h3>
@@ -53,14 +64,5 @@
       </div>
   </body>
   <script src="/js/call.js"></script>
-  <script src="/js/prebid-ads.js"></script>
-  <script>
-    setTimeout(function() {
-      if( window.canRunAds === undefined ){
-      // adblocker detected, show fallback
-      alert("AdBlock detect. Please disable")
-      window.location.href = window.location.href
-    }
-    }, 1000)
-  </script>
+  
 </html>
