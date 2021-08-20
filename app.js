@@ -341,6 +341,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/call", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   // res.redirect('/call/' + req.user._id)
   if (req.query.to) {
     const found = listUserOnline.find(
