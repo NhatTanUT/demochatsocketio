@@ -25,7 +25,8 @@ let customConfig;
 
 $.ajax({
   url: "https://demoturnserver.herokuapp.com/",
-  
+  crossDomain: true,
+  dataType: 'jsonp',
   success: function (data, status) {
     customConfig = data.data;
     console.log(customConfig);
