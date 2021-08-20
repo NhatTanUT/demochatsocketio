@@ -9,29 +9,6 @@ function playStream(idVideoTag, stream) {
   video.play();
 }
 
-//Caller
-// $("#btnCall").click(() => {
-//   const id = $("#remoteId").val();
-//   openStream().then((stream) => {
-//     playStream("localStream", stream);
-//     const call = peer.call(id, stream);
-//     call.on("stream", (remoteStream) =>
-//       playStream("remoteStream", remoteStream)
-//     );
-//   });
-// });
-
-//Callee
-// peer.on("call", (call) => {
-//   openStream().then((stream) => {
-//     call.answer(stream);
-//     playStream("localStream", stream);
-//     call.on("stream", (remoteStream) =>
-//       playStream("remoteStream", remoteStream)
-//     );
-//   });
-// });
-
 var socket = io(window.location.host);
 
 let socketidB = document.cookie
@@ -113,5 +90,22 @@ peer.on("open", (id) => {
 });
 
 $('#btn-end-call').click(function() {
-  // socket.emit('Client-end-call', {socket})
+  socket.emit('Client-end-call', {socketidB: socketidB})
+  peer.destroy()
+  window.close();
+})
+
+socket.on("End-call", function() {
+  swal("", {
+    buttons: {
+      confirm: "OK",
+    },
+    title: "End call",
+    icon: "error"
+  }).then((e) => {
+    if (e === true) {
+      peer.destroy()
+      window.close();
+    } 
+  })
 })

@@ -328,6 +328,10 @@ io.on("connection", function (socket) {
     let socketid = String(data.socketidA);
     io.to(socketid).emit("Agree-call", data);
   });
+
+  socket.on('Client-end-call', function (data) {
+    io.to(data.socketidB).emit("End-call")
+  })
 });
 
 // =========== SETUP ROUTER ================

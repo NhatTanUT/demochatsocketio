@@ -191,6 +191,9 @@ socket.on("Server-has-somebody-writing", function (data) {
 });
 
 async function show_confirm(data) {
+  var audio = new Audio('audio/incoming-call.mp3');
+  audio.play();
+
   swal("Calling...", {
     buttons: {
       confirm: "Let's do it!",
@@ -199,9 +202,11 @@ async function show_confirm(data) {
     title: data.nameA,
     icon: "warning"
   }).then((e) => {
+    audio.pause()
     if (e === true) {
       window.open('/call?from=' + data.socketidA, '_blank');
     } 
+    
   })
 
   // let r = window.confirm(data.nameA + " calling...")
@@ -217,7 +222,7 @@ socket.on("Have-calling", async function (data) {
   //   window.open('/call?from=' + data.socketidA, '_blank');
   // } 
   await show_confirm(data)
-
+  
 })
 
 socket.on("Anybody-chat-to", function (data) {
