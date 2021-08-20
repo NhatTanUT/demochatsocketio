@@ -30,11 +30,12 @@ $.ajax({
   success: function (data, status) {
     customConfig = data.data;
     console.log(customConfig);
+    var peer = new Peer({host: 'demo-peer-server.herokuapp.com', secure: true, port: 443, config: customConfig});
+
   },
   async: false
 })
 
-const peer = new Peer({host: 'demo-peer-server.herokuapp.com', secure: true, port: 443, config: customConfig});
 
 peer.on("open", (id) => {
   // $("#my-peer").append(id);
