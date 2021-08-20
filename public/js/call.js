@@ -34,10 +34,14 @@ $.ajax({
   },
   async: false
 })
+console.log(1)
 
 $(document).ready(function() {
+console.log(2)
+
   var peer = new Peer({host: 'demo-peer-server.herokuapp.com', secure: true, port: 443, config: customConfig});
 
+  console.log(3)
 
 peer.on("open", (id) => {
   // $("#my-peer").append(id);
