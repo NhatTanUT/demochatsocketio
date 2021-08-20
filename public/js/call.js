@@ -44,7 +44,19 @@ var username = document.cookie
     .find((row) => row.startsWith("username="))
     .split("=")[1];
 
-const peer = new Peer();
+let customConfig;
+
+$.ajax({
+  url: "https://demoturnserver.herokuapp.com/",
+  
+  success: function (data, status) {
+    customConfig = data.data;
+    console.log(customConfig);
+  },
+  async: false
+})
+
+const peer = new Peer({host: 'demo-peer-server.herokuapp.com', secure: true, port: 443, config: customConfig});
 
 peer.on("open", (id) => {
   // $("#my-peer").append(id);

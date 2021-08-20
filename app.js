@@ -11,6 +11,7 @@ const flash = require("express-flash");
 const bcrypt = require("bcrypt");
 const cookieparser = require("cookie-parser");
 const multer = require("multer");
+var cors = require('cors')
 
 const User = require("./models/user.model.js");
 const Room = require("./models/room.model.js");
@@ -28,6 +29,7 @@ app.use(
 );
 app.use(cookieparser());
 app.use(express.json());
+app.use(cors())
 
 app.use(flash());
 
