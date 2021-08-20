@@ -32,64 +32,65 @@ $.ajax({
     console.log(customConfig);
     var peer = new Peer({host: 'demo-peer-server.herokuapp.com', secure: true, port: 443, config: customConfig});
 
+    peer.on("open", (id) => {
+      // $("#my-peer").append(id);
+      // Get query string
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const params = Object.fromEntries(urlSearchParams.entries());
+    
+      if (Object.keys(params).some((e) => e === "to")) {
+        // Caller
+        openLocalStream().then((localstream) => {
+          playStream("localStream", localstream);
+    
+          // let mypeer = $("#my-peer").html();
+          socket.emit("Client-call-to", {
+            myPeerid: id,
+            nameA: username,
+            socketidB: socketidB,
+            socketidA: socket.id,
+          });
+    
+          socket.on("Agree-call", function (data) {
+            $('#calling-gif').hide()
+    
+            console.log(data);
+            let peeridB = String(data.peeridB);
+            console.log(peeridB);
+            const call = peer.call(peeridB, localstream);
+            call.on("stream", (remoteStream) =>
+              playStream("remoteStream", remoteStream)
+            );
+          });
+        });
+      } else if (Object.keys(params).some((e) => e === "from")) {
+        $('#calling-gif').hide()
+        
+        socket.emit("Client-receive-call", {
+          peeridB: id,
+          socketidA: params.from,
+          socketidC: socket.id,
+        });
+    
+        // Callee
+    
+        openLocalStream().then((localstream) => {
+          playStream("localStream", localstream);
+          peer.on("call", (call) => {
+            call.answer(localstream);
+            call.on("stream", (remoteStream) =>
+              playStream("remoteStream", remoteStream)
+            );
+          });
+        });
+      }
+    });
   },
   async: false
 })
 
 
-peer.on("open", (id) => {
-  // $("#my-peer").append(id);
-  // Get query string
-  const urlSearchParams = new URLSearchParams(window.location.search);
-  const params = Object.fromEntries(urlSearchParams.entries());
 
-  if (Object.keys(params).some((e) => e === "to")) {
-    // Caller
-    openLocalStream().then((localstream) => {
-      playStream("localStream", localstream);
-
-      // let mypeer = $("#my-peer").html();
-      socket.emit("Client-call-to", {
-        myPeerid: id,
-        nameA: username,
-        socketidB: socketidB,
-        socketidA: socket.id,
-      });
-
-      socket.on("Agree-call", function (data) {
-        $('#calling-gif').hide()
-
-        console.log(data);
-        let peeridB = String(data.peeridB);
-        console.log(peeridB);
-        const call = peer.call(peeridB, localstream);
-        call.on("stream", (remoteStream) =>
-          playStream("remoteStream", remoteStream)
-        );
-      });
-    });
-  } else if (Object.keys(params).some((e) => e === "from")) {
-    $('#calling-gif').hide()
-    
-    socket.emit("Client-receive-call", {
-      peeridB: id,
-      socketidA: params.from,
-      socketidC: socket.id,
-    });
-
-    // Callee
-
-    openLocalStream().then((localstream) => {
-      playStream("localStream", localstream);
-      peer.on("call", (call) => {
-        call.answer(localstream);
-        call.on("stream", (remoteStream) =>
-          playStream("remoteStream", remoteStream)
-        );
-      });
-    });
-  }
-});
 
 $('#btn-end-call').click(function() {
   socket.emit('Client-end-call', {socketidB: socketidB})
