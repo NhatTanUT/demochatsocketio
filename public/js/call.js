@@ -89,10 +89,10 @@ $(document).ready(function () {
       openLocalStream().then((localstream) => {
         playStream("localStream", localstream);
         console.log(3);
+        socket.on("Client-send-stream", function () {
         peer.on("call", async (call) => {
           call.answer(localstream);
           console.log(4);
-          socket.on("Client-send-stream", function () {
             call.on("stream", (remoteStream) => {
               playStream("remoteStream", remoteStream);
               console.log(5);
