@@ -62,13 +62,13 @@ peer.on("open", (id) => {
         socketidA: socket.id,
       });
 
-      socket.on("Agree-call", function (data) {
+      socket.on("Agree-call", async function (data) {
         $('#calling-gif').hide()
 
         console.log(data);
         let peeridB = String(data.peeridB);
         console.log(peeridB);
-        const call = peer.call(peeridB, localstream);
+        const call = await peer.call(peeridB, localstream);
         call.on("stream", (remoteStream) =>
           playStream("remoteStream", remoteStream)
         );
