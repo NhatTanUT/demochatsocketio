@@ -332,6 +332,10 @@ io.on("connection", function (socket) {
   socket.on('Client-end-call', function (data) {
     io.to(data.socketidB).emit("End-call")
   })
+
+  socket.on('Client-start-call-peer', function (data) {
+    io.to(data.socketidC).emit("Client-send-stream")
+  })
 });
 
 // =========== SETUP ROUTER ================

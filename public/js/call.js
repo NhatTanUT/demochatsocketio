@@ -61,14 +61,14 @@ $(document).ready(function () {
           socketidA: socket.id,
         });
 
-        socket.on("Agree-call", async function (data) {
+        socket.on("Agree-call", function (data) {
           $("#calling-gif").hide();
 
           console.log(data);
           let peeridB = String(data.peeridB);
           // console.log(peeridB);
-          const call = await peer.call(peeridB, localstream);
-          console.log(1);
+          const call = peer.call(peeridB, localstream);
+          socket.emit("Client-start-call-peer", {socketidC: data.socketidC})
           call.on("stream", (remoteStream) => {
             playStream("remoteStream", remoteStream);
             console.log(2);
@@ -92,10 +92,12 @@ $(document).ready(function () {
         peer.on("call", async (call) => {
           call.answer(localstream);
           console.log(4);
-          call.on("stream", (remoteStream) => {
-            playStream("remoteStream", remoteStream);
-            console.log(5);
-          });
+          socket.on("Client-send-stream", function () {
+            call.on("stream", (remoteStream) => {
+              playStream("remoteStream", remoteStream);
+              console.log(5);
+            });
+          })
         });
       });
     }
